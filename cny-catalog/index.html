@@ -104,8 +104,12 @@
                     <button onclick="toggleCart()" class="text-white/60 hover:text-white text-3xl">&times;</button>
                 </div>
             </div>
-            <div id="cart-items" class="max-h-[50vh] overflow-y-auto p-5 space-y-4"></div>
+            <div id="cart-items" class="max-h-[45vh] overflow-y-auto p-5 space-y-4"></div>
             <div class="p-5 border-t border-gray-100 bg-gray-50">
+                <div class="flex justify-between items-center mb-1 px-1">
+                    <span class="text-gray-400 font-bold text-sm">下单总数:</span>
+                    <span id="cart-total-qty" class="text-lg font-black text-gray-700">0 件</span>
+                </div>
                 <div class="flex justify-between items-center mb-5 px-1">
                     <span class="text-gray-400 font-bold">预计总额:</span>
                     <span id="cart-total-price" class="text-2xl font-black text-red-600 tracking-tighter">RM 0.00</span>
@@ -215,15 +219,10 @@
 
         let cart = {};
 
-        /**
-         * 自动处理图片加载失败，支持 JPG -> PNG -> 占位图 的回退逻辑
-         */
         function handleImageError(img, id) {
             if (img.src.includes('.jpg')) {
-                // 如果 JPG 失败，尝试 PNG
                 img.src = `images/${id}.png`;
             } else if (img.src.includes('.png')) {
-                // 如果 PNG 也失败，显示带文字的占位图
                 img.onerror = null;
                 img.src = `https://placehold.co/400x400/800000/ffffff?text=${id}`;
             }
@@ -236,7 +235,6 @@
 
             filtered.forEach(p => {
                 const pureId = p.id.replace('*', '');
-                // 初始尝试加载 JPG
                 const imgPath = `images/${pureId}.jpg`;
                 const videoPath = `videos/${pureId}.mp4`;
                 
@@ -320,6 +318,7 @@
             const count = Object.values(cart).reduce((a, b) => a + b.qty, 0);
             const total = Object.values(cart).reduce((a, b) => a + (b.qty * b.price), 0);
             document.getElementById('cart-count').innerText = count;
+            document.getElementById('cart-total-qty').innerText = `${count} 件`;
             document.getElementById('cart-total-price').innerText = `RM ${total.toFixed(2)}`;
         }
 
@@ -382,16 +381,19 @@
         function checkout() {
             if (Object.keys(cart).length === 0) return;
             let total = 0;
+            let totalQty = 0;
             let msg = `🏮 *2026 马年烟花订单* 🏮\n`;
-            msg += `🙋‍♂️  ${currentAgent.name}\n`;
+            msg += `🙋‍♂️   ${currentAgent.name}\n`;
             msg += `----------------------------\n`;
             Object.keys(cart).forEach((id, i) => {
                 const item = cart[id];
                 const sub = item.price * item.qty;
                 total += sub;
+                totalQty += item.qty;
                 msg += `${i+1}. *[${id}]* ${item.name}\n   👉 RM ${item.price.toFixed(2)} x ${item.qty} = *RM ${sub.toFixed(2)}*\n`;
             });
             msg += `----------------------------\n`;
+            msg += `📦 *下单总数: ${totalQty} 件*\n`;
             msg += `💰 *合计总额: RM ${total.toFixed(2)}*\n`;
             msg += `----------------------------\n`;
             msg += `祝您马到成功，万事如意！🐎`;
@@ -402,11 +404,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
